@@ -8,7 +8,7 @@
 
 [![DoT Innovation Sprint 2026](https://img.shields.io/badge/DoT%20Innovation%20Sprint-2026-blue?style=for-the-badge)](https://dot.gov.in)
 [![Theme: Smart Connectivity](https://img.shields.io/badge/Theme-Smart%20Connectivity-green?style=for-the-badge)]()
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Available-brightgreen?style=for-the-badge)](https://bhattyuvraj22.github.io/sanchar-shakti/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Available-brightgreen?style=for-the-badge)](https://bhattyuvraj22.github.io/Sanchar-Shakti/)
 
 ---
 
