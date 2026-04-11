@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanchar-Shakti · 5G UCE Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #040d1a;
+    --bg-panel: #071428;
+    --bg-card: #0a1c35;
+    --border: #0e2a4a;
+    --border-glow: #0d4a8a;
+    --neon-blue: #00d4ff;
+    --neon-cyan: #00ffcc;
+    --neon-green: #39ff87;
+    --orange: #ff6b1a;
+    --red-alert: #ff2d55;
+    --yellow: #ffd60a;
+    --purple: #bf5af2;
+    --text-primary: #e0f4ff;
+    --text-secondary: #5a8db0;
+    --text-muted: #2a5070;
+    --health-color: #00ffcc;
+    --emergency-color: #ff2d55;
+    --rail-color: #00d4ff;
+    --govt-color: #bf5af2;
+    --embb-color: #ffd60a;
+    --entertain-color: #5a8db0;
+    --iot-color: #39ff87;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,100,200,0.08) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,80,160,0.04) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,80,160,0.04) 40px);
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(90deg, var(--bg-deep) 0%, #061020 50%, var(--bg-deep) 100%);
+    border-bottom: 1px solid var(--border-glow);
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 0 30px rgba(0,100,200,0.15);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-badge {
+    background: linear-gradient(135deg, #0d4a8a, #00d4ff22);
+    border: 1px solid var(--neon-blue);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--neon-blue);
+    letter-spacing: 2px;
+  }
+
+  .header-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, #00d4ff, #00ffcc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--neon-green);
+    letter-spacing: 1px;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--neon-green);
+    border-radius: 50%;
+    animation: pulse-dot 1.5s infinite;
+    box-shadow: 0 0 8px var(--neon-green);
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .header-metrics {
+    display: flex;
+    gap: 24px;
+  }
+
+  .hmetric {
+    text-align: center;
+  }
+  .hmetric-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--neon-cyan);
+  }
+  .hmetric-label {
+    font-size: 9px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+  }
+
+  .clock {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--neon-blue);
+    letter-spacing: 2px;
+  }
+
+  /* MAIN LAYOUT */
+  .dashboard {
+    display: grid;
+    grid-template-columns: 260px 1fr 280px;
+    grid-template-rows: auto auto auto;
+    gap: 12px;
+    padding: 12px;
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+
+  /* PANEL BASE */
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+    opacity: 0.6;
+  }
+
+  .panel-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title .icon {
+    font-size: 14px;
+  }
+
+  /* ===== LEFT COLUMN ===== */
+  .col-left {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* SLA Compliance Traffic Lights */
+  .sla-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sla-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: border-color 0.3s;
+  }
+
+  .sla-row:hover { border-color: var(--border-glow); }
+
+  .sla-name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .sla-pct {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .sla-light {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sla-light.green { background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green); }
+  .sla-light.yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: pulse-dot 2s infinite; }
+  .sla-light.red { background: var(--red-alert); box-shadow: 0 0 8px var(--red-alert); animation: pulse-dot 0.8s infinite; }
+
+  .sla-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 10px;
+    overflow: hidden;
+  }
+
+  .sla-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  /* Scenario Injector */
+  .scenario-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .scenario-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+    font-family: 'Exo 2', sans-serif;
+  }
+
+  .scenario-btn:hover {
+    border-color: var(--neon-blue);
+    background: #0d2040;
+    transform: translateX(4px);
+    box-shadow: 0 0 12px rgba(0,100,200,0.2);
+  }
+
+  .scenario-btn.active {
+    border-color: var(--orange);
+    background: #1a0d00;
+    box-shadow: 0 0 16px rgba(255,107,26,0.3);
+  }
+
+  .scenario-btn .s-icon { font-size: 18px; }
+  .scenario-btn .s-text { font-size: 11px; font-weight: 600; letter-spacing: 1px; }
+  .scenario-btn .s-sub { font-size: 9px; color: var(--text-secondary); margin-top: 2px; }
+
+  .emergency-btn {
+    background: linear-gradient(135deg, #1a0008, #300010);
+    border: 1px solid var(--red-alert);
+    border-radius: 8px;
+    padding: 14px;
+    cursor: pointer;
+    color: var(--red-alert);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s;
+    margin-top: 4px;
+  }
+
+  .emergency-btn:hover {
+    background: linear-gradient(135deg, #300010, #500020);
+    box-shadow: 0 0 20px rgba(255,45,85,0.4);
+  }
+
+  .emergency-btn.active {
+    background: var(--red-alert);
+    color: white;
+    box-shadow: 0 0 30px rgba(255,45,85,0.7);
+    animation: em-pulse 1s infinite;
+  }
+
+  @keyframes em-pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255,45,85,0.7); }
+    50% { box-shadow: 0 0 40px rgba(255,45,85,1); }
+  }
+
+  /* ===== MIDDLE COLUMN ===== */
+  .col-middle {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* PRB Slice Heatmap */
+  .prb-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .slice-card {
+    background: var(--bg-card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 12px 10px;
+    text-align: center;
+    transition: all 0.5s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slice-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    transition: height 1s ease;
+    opacity: 0.12;
+    border-radius: 0 0 10px 10px;
+  }
+
+  .slice-card[data-slice="emergency"]::after { background: var(--emergency-color); }
+  .slice-card[data-slice="health"]::after { background: var(--health-color); }
+  .slice-card[data-slice="rail"]::after { background: var(--rail-color); }
+  .slice-card[data-slice="govt"]::after { background: var(--govt-color); }
+  .slice-card[data-slice="embb"]::after { background: var(--embb-color); }
+  .slice-card[data-slice="entertainment"]::after { background: var(--entertain-color); }
+
+  .slice-name {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .slice-pct {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .slice-label {
+    font-size: 8px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  /* Breathing Bar Chart */
+  .breathing-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 100px;
+    padding: 0 4px;
+  }
+
+  .b-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+  }
+
+  .b-bar-container {
+    flex: 1;
+    width: 100%;
+    background: var(--border);
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+
+  .b-bar-fill {
+    border-radius: 4px 4px 0 0;
+    transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .b-bar-label {
+    font-size: 8px;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  /* Traffic Forecast Chart */
+  .forecast-chart {
+    position: relative;
+    height: 150px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .forecast-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Audit Log */
+  .audit-log {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .audit-log::-webkit-scrollbar { width: 4px; }
+  .audit-log::-webkit-scrollbar-track { background: var(--border); }
+  .audit-log::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 2px; }
+
+  .audit-entry {
+    display: flex;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    border-left: 3px solid;
+    animation: slideIn 0.4s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .audit-entry.info { border-color: var(--neon-blue); }
+  .audit-entry.warning { border-color: var(--yellow); }
+  .audit-entry.critical { border-color: var(--red-alert); }
+  .audit-entry.success { border-color: var(--neon-green); }
+  .audit-entry.satellite { border-color: var(--purple); }
+
+  .audit-time { color: var(--text-secondary); flex-shrink: 0; font-size: 10px; }
+  .audit-msg { color: var(--text-primary); line-height: 1.4; }
+  .audit-msg .highlight { color: var(--orange); font-weight: 700; }
+  .audit-msg .sat { color: var(--purple); }
+  .audit-msg .health { color: var(--health-color); }
+  .audit-msg .good { color: var(--neon-green); }
+
+  /* XAI Panel */
+  .xai-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .xai-title {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--neon-blue);
+    margin-bottom: 10px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .xai-text {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    border-left: 2px solid var(--neon-blue);
+    padding-left: 12px;
+  }
+
+  .xai-decision { color: var(--orange); font-weight: 700; }
+  .xai-reason { color: var(--neon-cyan); }
+
+  /* ===== RIGHT COLUMN ===== */
+  .col-right {
+    grid-column: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* NTN Map */
+  .ntn-map {
+    position: relative;
+    background: var(--bg-card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    height: 220px;
+    overflow: hidden;
+  }
+
+  .map-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ntn-status-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .ntn-status-card {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .ntn-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--neon-cyan);
+  }
+
+  .ntn-lbl {
+    font-size: 8px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* Handoff Gauge */
+  .gauge-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  .gauge-svg {
+    width: 160px;
+    height: 90px;
+  }
+
+  /* Anomaly / Event Alerts */
+  .alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+
+  .alert-item {
+    background: var(--bg-card);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    border-left: 3px solid;
+  }
+
+  .alert-item.anomaly { border-color: var(--yellow); }
+  .alert-item.event { border-color: var(--neon-blue); }
+  .alert-item.satellite { border-color: var(--purple); }
+  .alert-item.ok { border-color: var(--neon-green); }
+
+  .alert-icon { font-size: 14px; flex-shrink: 0; }
+  .alert-text { color: var(--text-primary); line-height: 1.4; }
+  .alert-time { color: var(--text-secondary); font-family: 'Share Tech Mono', monospace; font-size: 9px; margin-top: 2px; }
+
+  /* Coverage Table */
+  .coverage-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .coverage-table th {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .coverage-table td {
+    padding: 7px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .coverage-table tr:last-child td { border-bottom: none; }
+  .coverage-table tr:hover td { background: rgba(0,100,200,0.05); }
+
+  .status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .status-pill.online { background: rgba(57,255,135,0.15); color: var(--neon-green); border: 1px solid var(--neon-green); }
+  .status-pill.satellite { background: rgba(191,90,242,0.15); color: var(--purple); border: 1px solid var(--purple); }
+  .status-pill.degraded { background: rgba(255,214,10,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
+
+  /* Bottom strip */
+  .bottom-bar {
+    grid-column: 1 / -1;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .bottom-metric {
+    text-align: center;
+  }
+
+  .bm-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .bm-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .bm-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--border);
+  }
+
+  /* Trai compliance toggle */
+  .trai-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--neon-blue);
+    transition: all 0.25s;
+  }
+
+  .trai-toggle:hover { box-shadow: 0 0 12px rgba(0,100,200,0.3); }
+  .trai-toggle.active { background: rgba(0,212,255,0.1); }
+
+  .toggle-switch {
+    width: 36px;
+    height: 18px;
+    background: var(--border);
+    border-radius: 9px;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .toggle-switch.on { background: var(--neon-blue); }
+
+  .toggle-knob {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+  }
+
+  .toggle-switch.on .toggle-knob { left: 20px; }
+
+  /* TRAI compliance view overlay */
+  .trai-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(4,13,26,0.95);
+    z-index: 200;
+    padding: 40px;
+    overflow-y: auto;
+  }
+
+  .trai-overlay.visible { display: block; }
+
+  .trai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .trai-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--neon-blue);
+  }
+
+  .close-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+
+  .close-btn:hover { border-color: var(--neon-blue); color: var(--neon-blue); }
+
+  .trai-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .trai-section {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .compliance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  .compliance-row:last-child { border-bottom: none; }
+  .comp-check { color: var(--neon-green); font-size: 16px; }
+
+  /* Scrollbar global */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 2px; }
+
+  /* Glow effects on values */
+  .glow-green { text-shadow: 0 0 10px var(--neon-green); }
+  .glow-blue { text-shadow: 0 0 10px var(--neon-blue); }
+  .glow-red { text-shadow: 0 0 10px var(--red-alert); }
+  .glow-orange { text-shadow: 0 0 10px var(--orange); }
+
+  /* Satellite orbit animation */
+  @keyframes orbit {
+    from { transform: rotate(0deg) translateX(70px) rotate(0deg); }
+    to { transform: rotate(360deg) translateX(70px) rotate(-360deg); }
+  }
+
+  @keyframes orbit2 {
+    from { transform: rotate(120deg) translateX(55px) rotate(-120deg); }
+    to { transform: rotate(480deg) translateX(55px) rotate(-480deg); }
+  }
+
+  @keyframes orbit3 {
+    from { transform: rotate(240deg) translateX(85px) rotate(-240deg); }
+    to { transform: rotate(600deg) translateX(85px) rotate(-600deg); }
+  }
+
+  .bar-animate {
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.3); }
+  }
+
+  .span-full { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="logo-badge">DoT · INDIA · UCE</div>
+    <div>
+      <div class="header-title">SANCHAR-SHAKTI</div>
+      <div class="header-sub">5G UNIFIED CONTINUITY ENGINE · DIGITAL TWIN DASHBOARD v1.0</div>
+    </div>
+  </div>
+
+  <div class="header-metrics">
+    <div class="hmetric">
+      <div class="hmetric-val glow-blue" id="h-subscribers">394M</div>
+      <div class="hmetric-label">5G SUBSCRIBERS</div>
+    </div>
+    <div class="hmetric">
+      <div class="hmetric-val glow-green" id="h-sla">92%</div>
+      <div class="hmetric-label">AVG SLA COMPLIANCE</div>
+    </div>
+    <div class="hmetric">
+      <div class="hmetric-val" style="color: var(--orange);" id="h-towers">5,15,000+</div>
+      <div class="hmetric-label">ACTIVE TOWERS</div>
+    </div>
+    <div class="hmetric">
+      <div class="hmetric-val" style="color: var(--purple);" id="h-ntn">LEO ACTIVE</div>
+      <div class="hmetric-label">NTN STATUS</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE SIMULATION
+    </div>
+    <div class="clock" id="clock">10:00:01</div>
+  </div>
+</header>
+
+<!-- MAIN DASHBOARD -->
+<div class="dashboard">
+
+  <!-- LEFT: SLA + Scenarios -->
+  <div class="col-left">
+
+    <!-- SLA Traffic Lights -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">🚦</span> SLA COMPLIANCE TRACKER</div>
+      <div class="sla-grid" id="sla-grid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Scenario Injector -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">⚡</span> SCENARIO INJECTOR</div>
+      <div class="scenario-grid">
+        <button class="scenario-btn" onclick="triggerScenario('ipl')">
+          <span class="s-icon">🏏</span>
+          <div>
+            <div class="s-text">IPL FINAL TSUNAMI</div>
+            <div class="s-sub">578M concurrent streams</div>
+          </div>
+        </button>
+        <button class="scenario-btn" onclick="triggerScenario('tatkal')">
+          <span class="s-icon">🚂</span>
+          <div>
+            <div class="s-text">TATKAL PULSE</div>
+            <div class="s-sub">3L users · 10:00 AM window</div>
+          </div>
+        </button>
+        <button class="scenario-btn" onclick="triggerScenario('tower_fail')">
+          <span class="s-icon">🌊</span>
+          <div>
+            <div class="s-text">RURAL TOWER FAILURE</div>
+            <div class="s-sub">Flood event · NTN handoff</div>
+          </div>
+        </button>
+        <button class="scenario-btn" onclick="triggerScenario('surgery')">
+          <span class="s-icon">❤️</span>
+          <div>
+            <div class="s-text">REMOTE SURGERY ALERT</div>
+            <div class="s-sub">URLLC critical · 0ms budget</div>
+          </div>
+        </button>
+        <button class="emergency-btn" id="emBtn" onclick="toggleEmergency()">
+          🚨 EMERGENCY MODE
+        </button>
+      </div>
+    </div>
+
+    <!-- Coverage Status -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">📡</span> COVERAGE STATUS</div>
+      <table class="coverage-table">
+        <thead>
+          <tr>
+            <th>NODE</th>
+            <th>TYPE</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody id="coverage-tbody">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- MIDDLE: Main Visualizations -->
+  <div class="col-middle">
+
+    <!-- PRB Slice Allocator -->
+    <div class="panel">
+      <div class="panel-title">
+        <span class="icon">🧠</span> LIVE PRB SLICE ALLOCATOR
+        <span style="margin-left:auto;font-family:'Share Tech Mono';font-size:10px;color:var(--neon-cyan);" id="total-prb">TOTAL PRBs: 106 / 106</span>
+      </div>
+      <div class="prb-grid" id="prb-grid">
+        <!-- filled by JS -->
+      </div>
+      <div class="breathing-bars" id="breathing-bars">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Traffic Forecast -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">📈</span> BI-LSTM TRAFFIC FORECAST · NEXT 15 MIN</div>
+      <div class="forecast-chart">
+        <svg class="forecast-svg" id="forecast-svg" viewBox="0 0 600 150" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="grad-actual" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="grad-pred" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffd60a" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#ffd60a" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          <line x1="0" y1="37" x2="600" y2="37" stroke="#0e2a4a" stroke-width="1"/>
+          <line x1="0" y1="75" x2="600" y2="75" stroke="#0e2a4a" stroke-width="1"/>
+          <line x1="0" y1="112" x2="600" y2="112" stroke="#0e2a4a" stroke-width="1"/>
+          <!-- Labels -->
+          <text x="4" y="35" fill="#2a5070" font-size="8" font-family="Share Tech Mono">HIGH</text>
+          <text x="4" y="73" fill="#2a5070" font-size="8" font-family="Share Tech Mono">MED</text>
+          <text x="4" y="110" fill="#2a5070" font-size="8" font-family="Share Tech Mono">LOW</text>
+          <!-- Actual traffic filled area -->
+          <path id="actual-area" fill="url(#grad-actual)" opacity="0.7"/>
+          <!-- Predicted traffic filled area -->
+          <path id="pred-area" fill="url(#grad-pred)" opacity="0.7"/>
+          <!-- Actual traffic line -->
+          <path id="actual-line" fill="none" stroke="#00d4ff" stroke-width="2"/>
+          <!-- Predicted traffic line -->
+          <path id="pred-line" fill="none" stroke="#ffd60a" stroke-width="2" stroke-dasharray="5,4"/>
+          <!-- Divider now/future -->
+          <line id="now-line" x1="300" y1="0" x2="300" y2="150" stroke="#5a8db0" stroke-width="1" stroke-dasharray="3,3"/>
+          <text id="now-label" x="305" y="12" fill="#5a8db0" font-size="8" font-family="Share Tech Mono">NOW</text>
+          <!-- Legend -->
+          <rect x="430" y="6" width="14" height="3" fill="#00d4ff" rx="1"/>
+          <text x="448" y="10" fill="#5a8db0" font-size="9" font-family="Share Tech Mono">ACTUAL</text>
+          <line x1="530" y1="8" x2="544" y2="8" stroke="#ffd60a" stroke-width="2" stroke-dasharray="4,3"/>
+          <text x="548" y="11" fill="#5a8db0" font-size="9" font-family="Share Tech Mono">PREDICTED</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 2-column bottom row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+      <!-- TRAI Audit Log -->
+      <div class="panel">
+        <div class="panel-title"><span class="icon">🔍</span> TRAI AUDIT LOG</div>
+        <div class="audit-log" id="audit-log">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- XAI Explanation Panel -->
+      <div class="panel">
+        <div class="panel-title"><span class="icon">💡</span> EXPLAINABLE AI · DECISION RATIONALE</div>
+        <div class="xai-panel">
+          <div class="xai-title">// LAST DRL DECISION</div>
+          <div class="xai-text" id="xai-text">
+            <span class="xai-decision">DECISION:</span> Reallocating 20% PRBs from Entertainment slice → Healthcare (URLLC).<br><br>
+            <span class="xai-reason">REASON:</span> Bi-LSTM detected IRCTC Tatkal surge pattern (w=0.87). Cardiac monitoring SLA at risk.<br><br>
+            <span style="color:var(--neon-green);">RESULT:</span> Healthcare SLA maintained at 100%. Entertainment capped at 82%.
+          </div>
+        </div>
+
+        <!-- Net Neutrality Badge -->
+        <div style="margin-top:12px;background:rgba(57,255,135,0.05);border:1px solid rgba(57,255,135,0.2);border-radius:8px;padding:10px 12px;">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--neon-green);margin-bottom:4px;">✅ NET NEUTRALITY COMPLIANCE</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5;">All prioritization falls under <strong style="color:var(--text-primary);">Specialized Services</strong> per TRAI Regulation 2023 §4(2). Entertainment not blocked — only deprioritized during critical events.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RIGHT: NTN Map + Alerts -->
+  <div class="col-right">
+
+    <!-- NTN Geospatial Map -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">🛰️</span> NTN CONTINUITY MAP · INDIA</div>
+      <div class="ntn-map">
+        <svg class="map-svg" viewBox="0 0 280 220" id="ntn-map-svg">
+          <!-- India outline (simplified) -->
+          <defs>
+            <radialGradient id="tower-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="sat-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#bf5af2" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#bf5af2" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <!-- Background -->
+          <rect width="280" height="220" fill="#050e1e"/>
+          <!-- Grid -->
+          <g stroke="#0a1c30" stroke-width="0.5">
+            <line x1="0" y1="44" x2="280" y2="44"/>
+            <line x1="0" y1="88" x2="280" y2="88"/>
+            <line x1="0" y1="132" x2="280" y2="132"/>
+            <line x1="0" y1="176" x2="280" y2="176"/>
+            <line x1="56" y1="0" x2="56" y2="220"/>
+            <line x1="112" y1="0" x2="112" y2="220"/>
+            <line x1="168" y1="0" x2="168" y2="220"/>
+            <line x1="224" y1="0" x2="224" y2="220"/>
+          </g>
+
+          <!-- India landmass (very simplified polygon) -->
+          <polygon
+            points="80,20 140,18 170,25 195,45 200,70 190,100 180,130 170,160 140,195 120,210 100,200 80,180 60,155 50,130 45,100 50,70 60,45"
+            fill="rgba(0,50,100,0.3)" stroke="#0d4a8a" stroke-width="1.5"/>
+
+          <!-- LEO Satellite Orbit Rings -->
+          <ellipse cx="140" cy="110" rx="100" ry="35" fill="none" stroke="#bf5af2" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.4"/>
+          <ellipse cx="140" cy="110" rx="75" ry="28" fill="none" stroke="#5a3080" stroke-width="0.6" stroke-dasharray="3,5" opacity="0.3"/>
+
+          <!-- Ground Towers -->
+          <g id="towers">
+            <!-- Delhi -->
+            <circle cx="120" cy="65" r="18" fill="url(#tower-glow)"/>
+            <circle cx="120" cy="65" r="5" fill="#00d4ff" opacity="0.9"/>
+            <line x1="120" y1="60" x2="120" y2="50" stroke="#00d4ff" stroke-width="1.5"/>
+            <line x1="115" y1="52" x2="120" y2="50" stroke="#00d4ff" stroke-width="1"/>
+            <line x1="125" y1="52" x2="120" y2="50" stroke="#00d4ff" stroke-width="1"/>
+            <text x="128" y="68" fill="#00d4ff" font-size="7" font-family="Share Tech Mono">DELHI</text>
+
+            <!-- Mumbai -->
+            <circle cx="95" cy="130" r="16" fill="url(#tower-glow)"/>
+            <circle cx="95" cy="130" r="5" fill="#00d4ff" opacity="0.9"/>
+            <line x1="95" y1="125" x2="95" y2="115" stroke="#00d4ff" stroke-width="1.5"/>
+            <line x1="90" y1="117" x2="95" y2="115" stroke="#00d4ff" stroke-width="1"/>
+            <line x1="100" y1="117" x2="95" y2="115" stroke="#00d4ff" stroke-width="1"/>
+            <text x="103" y="132" fill="#00d4ff" font-size="7" font-family="Share Tech Mono">MUMBAI</text>
+
+            <!-- Bengaluru -->
+            <circle cx="130" cy="168" r="14" fill="url(#tower-glow)"/>
+            <circle cx="130" cy="168" r="5" fill="#00d4ff" opacity="0.9"/>
+            <line x1="130" y1="163" x2="130" y2="153" stroke="#00d4ff" stroke-width="1.5"/>
+            <text x="138" y="170" fill="#00d4ff" font-size="7" font-family="Share Tech Mono">BLURU</text>
+
+            <!-- Guwahati (tower_042 - failure point) -->
+            <circle cx="182" cy="72" r="10" fill="rgba(255,45,85,0.2)" id="tower042-glow"/>
+            <circle cx="182" cy="72" r="4" fill="#ff2d55" id="tower042-dot"/>
+            <line x1="182" y1="68" x2="182" y2="60" stroke="#ff2d55" stroke-width="1.5" id="tower042-line"/>
+            <text x="156" y="85" fill="#ff2d55" font-size="6.5" font-family="Share Tech Mono" id="tower042-label">TOWER_042⚠</text>
+          </g>
+
+          <!-- LEO Satellites (animated) -->
+          <g id="sat1" style="transform-origin:140px 110px;">
+            <g style="animation: orbit 8s linear infinite; transform-origin: 140px 110px;">
+              <rect x="202" y="106" width="10" height="6" fill="#bf5af2" rx="1"/>
+              <line x1="199" y1="109" x2="194" y2="109" stroke="#bf5af2" stroke-width="1.5"/>
+              <line x1="215" y1="109" x2="220" y2="109" stroke="#bf5af2" stroke-width="1.5"/>
+            </g>
+          </g>
+          <g style="transform-origin:140px 110px;">
+            <g style="animation: orbit2 12s linear infinite; transform-origin: 140px 110px;">
+              <rect x="192" y="107" width="8" height="5" fill="#7030a0" rx="1"/>
+              <line x1="189" y1="109.5" x2="185" y2="109.5" stroke="#7030a0" stroke-width="1.5"/>
+              <line x1="202" y1="109.5" x2="206" y2="109.5" stroke="#7030a0" stroke-width="1.5"/>
+            </g>
+          </g>
+          <g style="transform-origin:140px 110px;">
+            <g style="animation: orbit3 15s linear infinite; transform-origin: 140px 110px;">
+              <rect x="217" y="107" width="9" height="5" fill="#9040c0" rx="1"/>
+              <line x1="214" y1="109.5" x2="210" y2="109.5" stroke="#9040c0" stroke-width="1.5"/>
+              <line x1="228" y1="109.5" x2="232" y2="109.5" stroke="#9040c0" stroke-width="1.5"/>
+            </g>
+          </g>
+
+          <!-- NTN Handoff beam (Delhi to satellite) -->
+          <line id="handoff-beam" x1="120" y1="65" x2="207" y2="109" stroke="#bf5af2" stroke-width="1" stroke-dasharray="5,3" opacity="0" id="beam">
+            <animate attributeName="opacity" values="0;0.8;0" dur="2s" repeatCount="indefinite" id="beam-anim"/>
+          </line>
+
+          <!-- Labels -->
+          <text x="8" y="14" fill="#1a4060" font-size="8" font-family="Share Tech Mono">LEO ORBIT</text>
+          <text x="8" y="215" fill="#1a4060" font-size="7" font-family="Share Tech Mono">3GPP REL-17 CHO · MAKE-BEFORE-BREAK</text>
+        </svg>
+      </div>
+
+      <div class="ntn-status-row">
+        <div class="ntn-status-card">
+          <div class="ntn-val glow-blue" id="ntn-latency">1.3ms</div>
+          <div class="ntn-lbl">HANDOFF LATENCY</div>
+        </div>
+        <div class="ntn-status-card">
+          <div class="ntn-val" style="color:var(--purple);">3 / 3</div>
+          <div class="ntn-lbl">LEO SATS VISIBLE</div>
+        </div>
+        <div class="ntn-status-card">
+          <div class="ntn-val glow-green" id="ntn-pkt">0</div>
+          <div class="ntn-lbl">PKT LOSS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Handoff Gauge -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">⚙️</span> HANDOFF LATENCY MONITOR</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 160 90">
+          <defs>
+            <linearGradient id="gauge-grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#39ff87"/>
+              <stop offset="60%" stop-color="#ffd60a"/>
+              <stop offset="100%" stop-color="#ff2d55"/>
+            </linearGradient>
+          </defs>
+          <!-- Track -->
+          <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="#0e2a4a" stroke-width="10" stroke-linecap="round"/>
+          <!-- Fill -->
+          <path id="gauge-fill" d="M 20 80 A 60 60 0 0 1 50 28" fill="none" stroke="url(#gauge-grad)" stroke-width="10" stroke-linecap="round"/>
+          <!-- Center value -->
+          <text x="80" y="78" text-anchor="middle" fill="#00ffcc" font-size="22" font-family="Share Tech Mono" font-weight="700" id="gauge-val">1.3</text>
+          <text x="80" y="88" text-anchor="middle" fill="#5a8db0" font-size="8" font-family="Share Tech Mono">ms HANDOFF</text>
+          <!-- Min/Max labels -->
+          <text x="16" y="90" fill="#2a5070" font-size="7" font-family="Share Tech Mono">0</text>
+          <text x="140" y="90" fill="#2a5070" font-size="7" font-family="Share Tech Mono">10ms</text>
+        </svg>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-secondary);font-family:'Share Tech Mono';">
+        <span>SESSION PRESERVED: <span style="color:var(--neon-green);">YES</span></span>
+        <span>CHO STATUS: <span style="color:var(--purple);">REL-17 ✓</span></span>
+      </div>
+    </div>
+
+    <!-- Event / Anomaly Alerts -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">⚠️</span> ANOMALY DETECTION · EVENT TRIGGERS</div>
+      <div class="alerts-list" id="alerts-list">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar span-full">
+    <div class="bottom-metric">
+      <div class="bm-val">300s</div>
+      <div class="bm-label">CONGESTION PREDICTION WINDOW</div>
+    </div>
+    <div class="bm-divider"></div>
+    <div class="bottom-metric">
+      <div class="bm-val">&lt;10ms</div>
+      <div class="bm-label">EDGE AI INFERENCE</div>
+    </div>
+    <div class="bm-divider"></div>
+    <div class="bottom-metric">
+      <div class="bm-val">100%</div>
+      <div class="bm-label">SLA CATEGORY-A UPTIME</div>
+    </div>
+    <div class="bm-divider"></div>
+    <div class="bottom-metric">
+      <div class="bm-val">$45B</div>
+      <div class="bm-label">O-RAN MARKET 2032</div>
+    </div>
+    <div class="bm-divider"></div>
+    <div class="bottom-metric">
+      <div class="bm-val glow-green">+17pp</div>
+      <div class="bm-label">IMPROVEMENT OVER STATIC</div>
+    </div>
+    <div class="bm-divider"></div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div class="trai-toggle" onclick="showTRAI()" id="trai-btn">
+        <div class="toggle-switch on" id="trai-switch">
+          <div class="toggle-knob"></div>
+        </div>
+        TRAI COMPLIANCE VIEW
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:9px;color:var(--text-secondary);letter-spacing:1px;line-height:1.8;">
+        Telecom Act 2023 · 3GPP TS 38.821 · O-RAN Compliant<br>
+        Aatmanirbhar Bharat · DoT Innovation Sprint 2026
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRAI COMPLIANCE OVERLAY -->
+<div class="trai-overlay" id="trai-overlay">
+  <div class="trai-header">
+    <div>
+      <div class="trai-title">TRAI REGULATORY COMPLIANCE REPORT</div>
+      <div style="font-size:12px;color:var(--text-secondary);letter-spacing:2px;margin-top:4px;">TELECOM REGULATORY AUTHORITY OF INDIA · TELECOM ACT 2023</div>
+    </div>
+    <button class="close-btn" onclick="hideTRAI()">✕ CLOSE</button>
+  </div>
+  <div class="trai-grid">
+    <div class="trai-section">
+      <div class="panel-title">SPECIALIZED SERVICES COMPLIANCE</div>
+      <div class="compliance-row"><span>Net Neutrality Framework §4(2)</span><span class="comp-check">✅ COMPLIANT</span></div>
+      <div class="compliance-row"><span>Specialized Services Declaration</span><span class="comp-check">✅ FILED</span></div>
+      <div class="compliance-row"><span>Entertainment not blocked</span><span class="comp-check">✅ CONFIRMED</span></div>
+      <div class="compliance-row"><span>Priority by societal weight only</span><span class="comp-check">✅ VERIFIED</span></div>
+      <div class="compliance-row"><span>All decisions SHAP-auditable</span><span class="comp-check">✅ ENABLED</span></div>
+    </div>
+    <div class="trai-section">
+      <div class="panel-title">PUBLIC UTILITY PRIORITY LOG</div>
+      <div style="font-family:'Share Tech Mono';font-size:11px;display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;" id="trai-log">
+        <!-- filled by JS -->
+      </div>
+    </div>
+    <div class="trai-section">
+      <div class="panel-title">DRL REWARD FUNCTION</div>
+      <div style="background:var(--bg-card);border-radius:8px;padding:14px;font-family:'Share Tech Mono';font-size:12px;line-height:2;border:1px solid var(--border);">
+        <div style="color:var(--neon-cyan);">R = Σ γᵗ ( Σ wₛ · SLAₛ(t) − λ · Congestion(t) )</div>
+        <div style="color:var(--text-secondary);margin-top:8px;font-size:10px;">
+          <div>wₛ = <span style="color:var(--neon-green);">1.0</span> Telemedicine · <span style="color:var(--orange);">0.95</span> Emergency</div>
+          <div>wₛ = <span style="color:var(--neon-blue);">0.80</span> Rail/Gov · <span style="color:var(--text-muted);">0.10</span> Gaming/Entertain</div>
+          <div style="margin-top:6px;">λ = Congestion penalty coefficient</div>
+          <div>γ = Discount factor · long-term stability</div>
+        </div>
+      </div>
+    </div>
+    <div class="trai-section">
+      <div class="panel-title">SOVEREIGN CONTROL FEATURES</div>
+      <div class="compliance-row"><span>Regulator override capability</span><span class="comp-check">✅ AVAILABLE</span></div>
+      <div class="compliance-row"><span>Decision replay / rollback</span><span class="comp-check">✅ ENABLED</span></div>
+      <div class="compliance-row"><span>Sovereign Indian cloud only</span><span class="comp-check">✅ ENFORCED</span></div>
+      <div class="compliance-row"><span>Differential privacy enabled</span><span class="comp-check">✅ ACTIVE</span></div>
+      <div class="compliance-row"><span>E2E encryption</span><span class="comp-check">✅ AES-256</span></div>
+      <div class="compliance-row"><span>Telecom Act 2023 §12 logging</span><span class="comp-check">✅ COMPLIANT</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  STATE
+// ============================================================
+let emergencyMode = false;
+let activeScenario = null;
+let tickCount = 0;
+
+// Slice data
+const slices = [
+  { id:'emergency', name:'EMERGENCY', color:'#ff2d55', prb:95, sla:98 },
+  { id:'health',    name:'HEALTHCARE', color:'#00ffcc', prb:88, sla:100 },
+  { id:'rail',      name:'RAIL/GOV',   color:'#00d4ff', prb:75, sla:95 },
+  { id:'govt',      name:'GOVT/IRCTC', color:'#bf5af2', prb:65, sla:91 },
+  { id:'embb',      name:'BROADBAND',  color:'#ffd60a', prb:40, sla:90 },
+  { id:'entertainment', name:'ENTERTAIN', color:'#5a8db0', prb:15, sla:82 },
+];
+
+const initialPRBs = { emergency:95, health:88, rail:75, govt:65, embb:40, entertainment:15 };
+const targetPRBs  = { ...initialPRBs };
+
+// Coverage nodes
+const coverageNodes = [
+  { node:'DELHI-gNB-01', type:'TERRESTRIAL', status:'online' },
+  { node:'MUMBAI-gNB-04', type:'TERRESTRIAL', status:'online' },
+  { node:'BENGALURU-gNB-07', type:'TERRESTRIAL', status:'online' },
+  { node:'TOWER_042-GWT', type:'TERRESTRIAL', status:'online' },
+  { node:'LEO-SAT-INSAT-7B', type:'SATELLITE', status:'satellite' },
+  { node:'LEO-SAT-ONEWEB-3', type:'SATELLITE', status:'satellite' },
+  { node:'LATUR-gNB-02', type:'TERRESTRIAL', status:'online' },
+];
+
+// Audit log entries
+const auditEntries = [];
+const alertEntries = [];
+const traiLogEntries = [];
+
+// ============================================================
+//  INIT
+// ============================================================
+window.onload = function() {
+  renderSLAGrid();
+  renderPRBGrid();
+  renderBreathingBars();
+  renderCoverageTable();
+  renderForecast();
+  addInitialAuditEntries();
+  addInitialAlerts();
+  fillTRAILog();
+  startClock();
+  setInterval(tick, 2500);
+};
+
+// ============================================================
+//  RENDER FUNCTIONS
+// ============================================================
+function renderSLAGrid() {
+  const container = document.getElementById('sla-grid');
+  container.innerHTML = slices.map(s => {
+    const light = s.sla >= 95 ? 'green' : s.sla >= 85 ? 'yellow' : 'red';
+    const pct = s.sla;
+    return `
+      <div class="sla-row">
+        <div class="sla-light ${light}"></div>
+        <div class="sla-name" style="color:${s.color};min-width:80px;">${s.name}</div>
+        <div class="sla-bar-bg">
+          <div class="sla-bar-fill" style="width:${pct}%;background:${s.color};"></div>
+        </div>
+        <div class="sla-pct" style="color:${s.color};">${pct}%</div>
+      </div>`;
+  }).join('');
+}
+
+function renderPRBGrid() {
+  const container = document.getElementById('prb-grid');
+  container.innerHTML = slices.map(s => `
+    <div class="slice-card" data-slice="${s.id}" id="card-${s.id}">
+      <div class="slice-name">${s.name}</div>
+      <div class="slice-pct" style="color:${s.color};" id="pct-${s.id}">${targetPRBs[s.id]}%</div>
+      <div class="slice-label">PRB ALLOC</div>
+    </div>`).join('');
+
+  // Set heights for ::after pseudo
+  slices.forEach(s => {
+    const card = document.getElementById('card-' + s.id);
+    if (card) card.style.setProperty('--fill-h', targetPRBs[s.id] + '%');
+  });
+}
+
+function renderBreathingBars() {
+  const container = document.getElementById('breathing-bars');
+  container.innerHTML = slices.map(s => `
+    <div class="b-bar-wrap">
+      <div class="b-bar-container">
+        <div class="b-bar-fill bar-animate" id="bar-${s.id}"
+          style="height:${targetPRBs[s.id]}%;background:linear-gradient(to top, ${s.color}99, ${s.color});"></div>
+      </div>
+      <div class="b-bar-label" style="color:${s.color};">${s.id === 'entertainment' ? 'ENTS' : s.name.substring(0,5)}</div>
+    </div>`).join('');
+}
+
+function renderCoverageTable() {
+  const tbody = document.getElementById('coverage-tbody');
+  tbody.innerHTML = coverageNodes.map(n => `
+    <tr>
+      <td style="font-family:'Share Tech Mono';font-size:10px;">${n.node}</td>
+      <td style="font-size:10px;color:var(--text-secondary);">${n.type}</td>
+      <td><span class="status-pill ${n.status}">${n.status.toUpperCase()}</span></td>
+    </tr>`).join('');
+}
+
+function renderForecast() {
+  // Generate smooth sine-like paths
+  const w = 600, h = 150, pad = 15;
+  const now = 300; // midpoint
+
+  // Actual (left of now)
+  let actualPts = [];
+  let predPts = [];
+
+  for (let x = pad; x <= now; x += 10) {
+    const t = (x - pad) / (now - pad);
+    const noise = Math.sin(t * 8) * 12 + Math.cos(t * 5) * 8;
+    const y = 90 - t * 40 + noise;
+    actualPts.push([x, Math.max(20, Math.min(130, y))]);
+  }
+
+  // Predicted (right of now, smoother)
+  for (let x = now; x <= w - pad; x += 10) {
+    const t = (x - now) / (w - now - pad);
+    const noise = Math.sin(t * 5) * 6;
+    const y = 50 - t * 15 + noise;
+    predPts.push([x, Math.max(20, Math.min(130, y))]);
+  }
+
+  const toPath = (pts) => pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
+  const toArea = (pts, baseY) => {
+    const path = toPath(pts);
+    const last = pts[pts.length - 1];
+    const first = pts[0];
+    return `${path} L ${last[0]} ${baseY} L ${first[0]} ${baseY} Z`;
+  };
+
+  document.getElementById('actual-line').setAttribute('d', toPath(actualPts));
+  document.getElementById('pred-line').setAttribute('d', toPath(predPts));
+  document.getElementById('actual-area').setAttribute('d', toArea(actualPts, 145));
+  document.getElementById('pred-area').setAttribute('d', toArea(predPts, 145));
+}
+
+function addInitialAuditEntries() {
+  const entries = [
+    { type:'info', time:'10:00:01', msg:'DRL: <span class="highlight">+20% PRB</span> → HLTH slice. Trigger: IPL surge detected.' },
+    { type:'warning', time:'10:00:01', msg:'Tatkal surge: <span class="highlight">+20% PRBs</span> → Railway Slice · SHAP: event=Tatkal, w=0.87' },
+    { type:'satellite', time:'10:00:28', msg:'RSRP drop @ tower_042. CHO (3GPP Rel-17) <span class="sat">NTN pre-auth triggered...</span>' },
+    { type:'success', time:'10:00:29', msg:'<span class="good">NTN tunnel active.</span> Session maintained. Zero packet loss.' },
+    { type:'info', time:'10:00:41', msg:'ENTRTN slice capped at 82%. <span class="health">URLLC SLA protected @ 100%.</span>' },
+    { type:'critical', time:'10:00:55', msg:'Cardiac monitor SLA spike detected. Emergency PRB redistribution initiated.' },
+  ];
+  entries.forEach(e => addAuditEntry(e.type, e.time, e.msg));
+  renderAuditLog();
+}
+
+function addInitialAlerts() {
+  const alerts = [
+    { cls:'event', icon:'🏏', text:'IPL Final detected. 578M concurrent stream forecast active.', time:'10:00:00' },
+    { cls:'anomaly', icon:'⚠️', text:'Traffic spike on eMBB slice — 2.3σ above baseline.', time:'10:00:12' },
+    { cls:'satellite', icon:'🛰️', text:'LEO pre-authentication handshake complete. tower_042 monitored.', time:'10:00:28' },
+    { cls:'ok', icon:'✅', text:'All URLLC SLAs nominal. Cardiac monitoring secured.', time:'10:00:41' },
+  ];
+  alerts.forEach(a => {
+    alertEntries.unshift(a);
+  });
+  renderAlerts();
+}
+
+function fillTRAILog() {
+  const entries = [
+    '10:00:01 · PRB borrowed from ENTERTAIN → HEALTH · Amount: 20% · SHAP score: 0.91',
+    '10:00:01 · PRB borrowed from ENTERTAIN → RAIL · Amount: 15% · Trigger: Tatkal',
+    '10:00:28 · NTN CHO invoked for tower_042 · Latency: <2s · Session: PRESERVED',
+    '10:00:41 · ENTERTAIN cap applied · Reason: URLLC protection · Duration: ongoing',
+    '10:00:55 · EMERGENCY PRB uplift · +5% from eMBB · Cardiac SLA: 100%',
+  ];
+  const container = document.getElementById('trai-log');
+  container.innerHTML = entries.map(e =>
+    `<div style="padding:6px 8px;background:rgba(0,212,255,0.05);border-radius:4px;border-left:2px solid var(--neon-blue);color:var(--text-secondary);">${e}</div>`
+  ).join('');
+}
+
+// ============================================================
+//  LOG HELPERS
+// ============================================================
+function getTimeStr() {
+  const d = new Date();
+  return d.toTimeString().slice(0,8);
+}
+
+function addAuditEntry(type, time, msg) {
+  auditEntries.unshift({ type, time, msg });
+  if (auditEntries.length > 20) auditEntries.pop();
+}
+
+function renderAuditLog() {
+  const container = document.getElementById('audit-log');
+  container.innerHTML = auditEntries.map(e =>
+    `<div class="audit-entry ${e.type}">
+      <div class="audit-time">${e.time}</div>
+      <div class="audit-msg">${e.msg}</div>
+    </div>`
+  ).join('');
+}
+
+function renderAlerts() {
+  const container = document.getElementById('alerts-list');
+  container.innerHTML = alertEntries.slice(0,6).map(a =>
+    `<div class="alert-item ${a.cls}">
+      <div class="alert-icon">${a.icon}</div>
+      <div>
+        <div class="alert-text">${a.text}</div>
+        <div class="alert-time">${a.time}</div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ============================================================
+//  TICK — background simulation
+// ============================================================
+function tick() {
+  tickCount++;
+  const t = getTimeStr();
+
+  // Slight PRB fluctuations
+  if (!emergencyMode) {
+    slices.forEach(s => {
+      const base = initialPRBs[s.id];
+      const delta = (Math.random() - 0.5) * 6;
+      targetPRBs[s.id] = Math.max(5, Math.min(99, base + delta));
+    });
+    updateBars();
+  }
+
+  // Random audit entries
+  if (tickCount % 3 === 0) {
+    const msgs = [
+      { type:'info', msg: 'Bi-LSTM: <span class="highlight">+5% eMBB demand</span> predicted in 4 min. Pre-allocating PRBs.' },
+      { type:'success', msg: '<span class="good">SLA check passed.</span> URLLC latency: 0.8ms. Target: &lt;1ms.' },
+      { type:'info', msg: 'DRL epsilon-greedy: exploring bandwidth config #4872. Reward: +0.12.' },
+      { type:'satellite', msg: '<span class="sat">LEO-SAT-INSAT-7B</span> position updated. Elevation: 42°. Link quality: GOOD.' },
+    ];
+    const pick = msgs[tickCount % msgs.length];
+    addAuditEntry(pick.type, t, pick.msg);
+    renderAuditLog();
+  }
+}
+
+function updateBars() {
+  slices.forEach(s => {
+    const bar = document.getElementById('bar-' + s.id);
+    const pct = document.getElementById('pct-' + s.id);
+    if (bar) bar.style.height = targetPRBs[s.id] + '%';
+    if (pct) pct.textContent = Math.round(targetPRBs[s.id]) + '%';
+  });
+  updateSLA();
+}
+
+function updateSLA() {
+  slices.forEach(s => {
+    const noise = (Math.random() - 0.5) * 4;
+    s.sla = Math.max(60, Math.min(100, (emergencyMode && (s.id === 'emergency' || s.id === 'health') ? 100 : s.sla + noise)));
+  });
+  renderSLAGrid();
+}
+
+// ============================================================
+//  SCENARIOS
+// ============================================================
+function triggerScenario(name) {
+  // Reset previous
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  activeScenario = name;
+  event.currentTarget.classList.add('active');
+
+  const t = getTimeStr();
+
+  if (name === 'ipl') {
+    targetPRBs.entertainment = 82;
+    targetPRBs.health = 100;
+    targetPRBs.emergency = 98;
+    targetPRBs.embb = 60;
+    addAuditEntry('warning', t, '🏏 <span class="highlight">IPL TSUNAMI ACTIVE.</span> 578M streams. DRL borrowing 25% PRBs from ENTERTAIN → HEALTH.');
+    addAuditEntry('info', t, 'Bi-LSTM surge forecast confirmed. Tatkal window overlap risk detected.');
+    alertEntries.unshift({ cls:'anomaly', icon:'🏏', text:'IPL Final: Entertainment slice saturating. PRBs being redistributed to critical slices.', time:t });
+    setXAI('IPL Final surge detected (578M streams). Entertainment slice saturating.', 'Redistributing 25% PRBs from ENTERTAINMENT → HEALTHCARE to maintain URLLC SLA.', 'Healthcare maintained at 100%. Entertainment continues at 82%.');
+  } else if (name === 'tatkal') {
+    targetPRBs.rail = 95;
+    targetPRBs.govt = 88;
+    targetPRBs.embb = 35;
+    targetPRBs.entertainment = 10;
+    addAuditEntry('warning', t, '🚂 <span class="highlight">TATKAL PULSE ACTIVE.</span> 3L users/60s. IRCTC surge. SHAP: event=Tatkal, w=0.87');
+    addAuditEntry('info', t, 'DRL: +20% PRBs → Railway Slice. eMBB and ENTERTAIN deprioritized.');
+    alertEntries.unshift({ cls:'event', icon:'🚂', text:'TATKAL WINDOW: 10:00 AM surge. 3 lakh concurrent IRCTC requests detected.', time:t });
+    setXAI('Tatkal ticket window opened. 3 lakh concurrent requests in 60s.', 'Borrowing PRBs from eMBB and Entertainment → Rail/Gov slice. SHAP weight: 0.87.', 'Session timeout rate reduced by ~30%. IRCTC SLA maintained.');
+  } else if (name === 'tower_fail') {
+    coverageNodes[3].status = 'degraded';
+    renderCoverageTable();
+    targetPRBs.entertainment = 8;
+    document.getElementById('ntn-latency').textContent = '1.8ms';
+    document.getElementById('ntn-pkt').textContent = '0';
+    addAuditEntry('critical', t, '🌊 <span style="color:#ff2d55;">TOWER_042 SIGNAL DEGRADED.</span> Flood event. RSRP: -115dBm.');
+    addAuditEntry('satellite', t, '<span class="sat">CHO (3GPP Rel-17) NTN pre-auth triggered.</span> LEO-SAT-INSAT-7B target acquired.');
+    addAuditEntry('success', t, '<span class="good">NTN tunnel active.</span> &lt;2s failover. Session preserved. Zero packet loss.');
+    alertEntries.unshift({ cls:'satellite', icon:'🛰️', text:'TOWER_042 FAILURE: NTN handoff executed. <2s failover. All sessions preserved via LEO.', time:t });
+    setXAI('TOWER_042 signal dropped below RSRP threshold (-115dBm).', 'CHO (3GPP Rel-17) pre-authenticated satellite link BEFORE signal dropped. Make-Before-Break.', 'Zero packet loss. <2s failover. Session IP preserved across terrestrial-NTN boundary.');
+  } else if (name === 'surgery') {
+    targetPRBs.health = 100;
+    targetPRBs.emergency = 99;
+    targetPRBs.entertainment = 5;
+    targetPRBs.embb = 25;
+    slices.find(s => s.id === 'health').sla = 100;
+    addAuditEntry('critical', t, '❤️ <span class="health">REMOTE SURGERY ALERT.</span> URLLC slice: 0ms budget. Cardiac monitoring critical.');
+    addAuditEntry('info', t, 'DRL: max priority w=1.0. ALL available PRBs redirected → URLLC HEALTH slice.');
+    alertEntries.unshift({ cls:'ok', icon:'❤️', text:'SURGERY MODE: URLLC slice guaranteed. All non-critical traffic deprioritized.', time:t });
+    setXAI('Remote cardiac surgery in progress. URLLC latency budget: <1ms.', 'DRL sets w=1.0 for Healthcare. All entertainment/gaming traffic capped at minimum allocation.', 'URLLC SLA: 100%. Latency: 0.8ms. Patient connectivity guaranteed.');
+  }
+
+  updateBars();
+  renderSLAGrid();
+  renderAuditLog();
+  renderAlerts();
+}
+
+function toggleEmergency() {
+  emergencyMode = !emergencyMode;
+  const btn = document.getElementById('emBtn');
+
+  if (emergencyMode) {
+    btn.classList.add('active');
+    btn.textContent = '🚨 EMERGENCY ACTIVE — CLICK TO DEACTIVATE';
+
+    // Override all PRBs
+    targetPRBs.emergency = 99;
+    targetPRBs.health = 99;
+    targetPRBs.rail = 95;
+    targetPRBs.govt = 90;
+    targetPRBs.embb = 5;
+    targetPRBs.entertainment = 2;
+
+    slices.find(s => s.id === 'emergency').sla = 100;
+    slices.find(s => s.id === 'health').sla = 100;
+
+    const t = getTimeStr();
+    addAuditEntry('critical', t, '🚨 <span style="color:#ff2d55;font-weight:700;">EMERGENCY MODE ACTIVATED.</span> 100% resources → Emergency + Health slices. Entertainment suspended.');
+    alertEntries.unshift({ cls:'anomaly', icon:'🚨', text:'EMERGENCY MODE: All PRBs redirected. Police, Fire, Hospital connections at maximum priority.', time:t });
+    setXAI('Emergency Mode manually activated.', 'Manual override: all available PRBs pushed to Emergency (w=1.0) and Healthcare (w=1.0). Entertainment and gaming suspended.', 'Emergency SLA: 100%. All critical services guaranteed. Compliant with Telecom Act 2023 §8.');
+    document.getElementById('h-ntn').textContent = '🚨 EMRG';
+    document.getElementById('h-ntn').style.color = 'var(--red-alert)';
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '🚨 EMERGENCY MODE';
+    Object.assign(targetPRBs, initialPRBs);
+    document.getElementById('h-ntn').textContent = 'LEO ACTIVE';
+    document.getElementById('h-ntn').style.color = 'var(--purple)';
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    activeScenario = null;
+    const t = getTimeStr();
+    addAuditEntry('success', t, '<span class="good">Emergency mode deactivated.</span> Normal slice weights restored. System nominal.');
+  }
+
+  updateBars();
+  renderSLAGrid();
+  renderAuditLog();
+  renderAlerts();
+}
+
+function setXAI(decision, reason, result) {
+  document.getElementById('xai-text').innerHTML =
+    `<span class="xai-decision">DECISION:</span> ${decision}<br><br>
+     <span class="xai-reason">REASON:</span> ${reason}<br><br>
+     <span style="color:var(--neon-green);">RESULT:</span> ${result}`;
+}
+
+// ============================================================
+//  TRAI OVERLAY
+// ============================================================
+function showTRAI() {
+  document.getElementById('trai-overlay').classList.add('visible');
+}
+
+function hideTRAI() {
+  document.getElementById('trai-overlay').classList.remove('visible');
+}
+
+// ============================================================
+//  CLOCK
+// ============================================================
+function startClock() {
+  function update() {
+    const d = new Date();
+    document.getElementById('clock').textContent = d.toTimeString().slice(0,8);
+  }
+  update();
+  setInterval(update, 1000);
+}
+</script>
+</body>
+</html>
