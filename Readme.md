@@ -26,7 +26,7 @@
 
 ## 🌐 Live Demo
 
-> **[👉 Click here to open the Interactive Dashboard](https://bhattyuvraj22.github.io/sanchar-shakti/)**
+> **[👉 Click here to open the Interactive Dashboard](https://bhattyuvraj22.github.io/Sanchar-Shakti/)**
 
 This GitHub repository serves as the **live demo** for Sanchar-Shakti's static simulation dashboard. No installation needed — open the link above in any modern browser to interact with the AI engine in real time.
 
