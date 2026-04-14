@@ -28,7 +28,7 @@
 
 > **[👉 Click here to open the Interactive Dashboard](https://bhattyuvraj22.github.io/Sanchar-Shakti/)**
 
-This GitHub repository serves as the **live demo** for Sanchar-Shakti's static simulation dashboard. No installation needed — open the link above in any modern browser to interact with the AI engine in real time.
+> ⚠️ **Note:** This is a static simulation dashboard built for demonstration purposes only. It showcases the system's logic, AI decision-making, and real-time behaviour in a browser-based environment. A fully functional MVP with live 5G network integration will be developed if selected for the next round.
 
 The demo showcases:
 - Real-time 5G network slice visualization
@@ -80,8 +80,8 @@ Benchmarked on **Simu5G** (CMC 2025):
 ---
 
 ## 📁 Repository Structure
+'''
 
-```
 sanchar-shakti/
 ├── index.html          ← 🌐 Live demo entry point (open this)
 ├── assets/
@@ -89,8 +89,7 @@ sanchar-shakti/
 │   └── dashboard.js    ← Simulation logic, scenarios, rendering
 ├── pitch-deck.pdf      ← Full DoT submission proposal
 └── README.md
-```
-
+'''
 
 ---
 
